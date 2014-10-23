@@ -9,7 +9,7 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([create/0, insert/2, update/3, remove/2, init/0]).
+-export([create/0, insert/2, update/3, remove/2, init/0,nearestSearch/3, radiusSearch/4]).
 
 
 -on_load(init/0).
@@ -44,7 +44,10 @@ update(_Octree, _Index, _Point) ->
 remove(_Octree, _Index) ->
     exit(octree_nif_not_loaded).
 
-
+radiusSearch(_Octree, _Index, _Radius, _MaxAmount) ->
+	exit(octree_nif_not_loaded).
+nearestSearch(_Octree, _Index, _MaxAmount) ->
+	exit(octree_nif_not_loaded).
 
 
 

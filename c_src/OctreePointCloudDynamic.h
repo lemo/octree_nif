@@ -9,32 +9,30 @@
 #define OCTREEPOINTCLOUDDYNAMIC_H_
 
 #include <queue>
+#include <exception>
 #include <pcl/octree/octree.h>
-#define DEBUG
-#ifdef DEBUG
-#include <iostream>
-#endif
 
 template<typename PointTArg, typename BaseClass = pcl::octree::OctreePointCloud<
 		PointTArg> >
-class OctreePointCloudDynamic: BaseClass {
+class OctreePointCloudDynamic: public BaseClass {
 public:
 	typedef PointTArg PointT;
 	typedef int HandleT;
+	typedef std::queue<HandleT> QueueT;
 
-	std::queue<HandleT> queue_;
+	QueueT queue_;
+	typename BaseClass::PointCloudPtr pointcloud_;
+	typename BaseClass::IndicesPtr indices_;
 	typename pcl::PointCloud<PointT>::Ptr input__;
 
 	OctreePointCloudDynamic(const double resolution) :
-			BaseClass(resolution), queue_() {
-#ifdef DEBUG
-		std::cout << "+";
-#endif
+			BaseClass(resolution), queue_(), pointcloud_(
+					new typename BaseClass::PointCloud()), indices_(
+					new std::vector<int>()) {
+		setInputCloud(pointcloud_, indices_);
+
 	}
 	virtual ~OctreePointCloudDynamic() {
-#ifdef DEBUG
-		std::cout << "-";
-#endif
 	}
 
 	HandleT addPoint(PointT point) {
@@ -53,10 +51,12 @@ public:
 
 	void updatePoint(HandleT handle, PointT point) {
 		PointT& oldpoint = (*this->input__)[handle];
-		pcl::octree::OctreeContainerPointIndices* container =
+		pcl::octree::OctreeContainerPointIndices* oldcontainer =
 				this->findLeafAtPoint(oldpoint);
-		oldpoint = point;
-		if (container != this->findLeafAtPoint(point)) {
+		pcl::octree::OctreeContainerPointIndices* container =
+				this->findLeafAtPoint(point);
+
+		if (container == oldcontainer) {
 			if (container->getSize() <= 1) {
 				this->removeLeaf(point.y, point.y, point.z);
 			} else {
@@ -65,12 +65,14 @@ public:
 						it != vec.end(); ++it) {
 					if (handle == (*it)) {
 						vec.erase(it);
+
 						break;
 					}
 				}
 			}
 			this->addPointIdx(handle);
 		}
+
 	}
 
 	void removePoint(HandleT handle) {
