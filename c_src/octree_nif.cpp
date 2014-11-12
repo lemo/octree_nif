@@ -43,7 +43,7 @@ OctreeT* extractOctree(ErlNifEnv* env, ERL_NIF_TERM term) throw (nifpp::badarg) 
 	nifpp::str_atom atom;
 	uintptr_t reference;
 	OctreeT* octree;
-	auto octree_in = std::make_tuple(ref(atom), ref(reference), ref(octree));
+	auto octree_in = std::make_tuple(std::ref(atom), std::ref(reference), std::ref(octree));
 	nifpp::get_throws(env, term, octree_in);
 	if (atom.compare("octree_nif_t") != 0) {
 		throw nifpp::badarg();
@@ -65,8 +65,8 @@ void extractPoint(ErlNifEnv* env, ERL_NIF_TERM term, OctreeT* octree,
 		double x, y, z;
 		int l;
 		nifpp::str_atom atom;
-		auto tup_in = std::make_tuple(ref(atom), ref(x), ref(y), ref(z),
-				ref(l));
+		auto tup_in = std::make_tuple(std::ref(atom), std::ref(x), std::ref(y), std::ref(z),
+				std::ref(l));
 		nifpp::get_throws(env, term, tup_in);
 		if (atom.compare("octree_point") != 0) {
 			throw nifpp::badarg();
